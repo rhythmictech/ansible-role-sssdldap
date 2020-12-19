@@ -1,0 +1,65 @@
+# {{ ansible_managed }}
+[sssd]
+config_file_version = 2
+services = nss,pam,sudo,ssh
+domains = default
+reconnection_retries = 5
+debug_level = 5
+
+[nss]
+filter_users = {{ sssdldap_filter_users | join(',') }}
+filter_groups = {{ sssdldap_filter_groups | join(',') }}
+
+[pam]
+
+[sudo]
+
+[domain/default]
+auth_provider = ldap
+id_provider = ldap
+chpass_provider = ldap
+sudo_provider = ldap
+
+ldap_uri = {{ sssdldap_ldap_uri }}
+ldap_chpass_uri =
+ldap_tls_cacert = {{ sssdldap_cacert }}
+{% if sssdldap_enable_tls %}
+ldap_tls_reqcert = demand
+ldap_id_use_start_tls = true
+{% else %}
+ldap_tls_reqcert = never
+ldap_id_use_start_tls = false
+{% end %}
+
+ldap_default_bind_dn = {{ sssdldap_bind_dn }}
+ldap_default_authtok_type = password
+ldap_default_authtok = {{ sssdldap_bind_pw }}
+
+ldap_search_base = {{ sssdldap_search_base }}
+ldap_access_filter = {{ sssdldap_access_filter }}
+
+ldap_sudo_search_base = {{ sssdldap_sudo_search_base }}
+ldap_sudo_full_refresh_interval = 43200
+ldap_sudo_smart_refresh_interval = 3600
+
+cache_credentials = true
+entry_cache_timeout = 600
+ldap_network_timeout = 6
+pam_id_timeout = 180
+
+ldap_user_ssh_public_key = sshPublicKey
+{% if sssdldap_ldap_is_ad == true %}
+ldap_user_home_directory = unixHomeDirectory
+ldap_user_principal = userPrincipalName
+ldap_user_shell = loginShell
+
+ldap_schema = AD
+access_provider = ldap
+ldap_referrals = false
+{% else %}
+
+ldap_schema = rfc2307bis
+enumerate = false
+ldap_group_member = uniquemember
+ldap_sudorule_runasuser = sudoRunAs
+{% endif %}

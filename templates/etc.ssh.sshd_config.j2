@@ -1,0 +1,56 @@
+# {{ ansible_managed }}
+Protocol 2
+SyslogFacility AUTHPRIV
+LogLevel INFO
+X11Forwarding {{ sssdldap_x11_forwarding }}
+
+MaxAuthTries {{ sssdldap_ssh_maxauthtries }}
+
+IgnoreRhosts yes
+HostbasedAuthentication no
+
+PermitRootLogin no
+PermitEmptyPasswords no
+PermitUserEnvironment no
+
+Ciphers aes256-ctr
+MACs hmac-sha2-512,hmac-sha2-256
+
+ClientAliveInterval 300
+ClientAliveCountMax 0
+
+DenyUsers {{ sssdldap_ssh_denyusers }}
+
+Banner {{ sssdldap_ssh_banner }}
+
+PubkeyAuthentication yes
+PasswordAuthentication no
+KerberosAuthentication no
+ChallengeResponseAuthentication no
+GSSAPIAuthentication no
+GSSAPICleanupCredentials no
+
+UsePAM yes
+
+AcceptEnv LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES
+AcceptEnv LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT
+AcceptEnv LC_IDENTIFICATION LC_ALL LANGUAGE
+AcceptEnv XMODIFIERS
+
+AuthorizedKeysFile      .ssh/authorized_keys
+
+AuthorizedKeysCommand /usr/bin/sss_ssh_authorizedkeys
+{% if (ansible_distribution == 'RedHat' and ansible_distribution_major_version == '7') or (ansible_distribution == 'Amazon' and ansible_distribution_major_version == '2') %}
+AuthorizedKeysCommandUser root
+
+HostKey /etc/ssh/ssh_host_rsa_key
+HostKey /etc/ssh/ssh_host_ecdsa_key
+HostKey /etc/ssh/ssh_host_ed25519_key
+
+{% else %}
+AuthorizedKeysCommandRunAs root
+
+HostKey /etc/ssh/ssh_host_rsa_key
+{% endif %}
+
+Subsystem	sftp	/usr/libexec/openssh/sftp-server

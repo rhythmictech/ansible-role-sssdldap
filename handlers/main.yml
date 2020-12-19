@@ -1,0 +1,13 @@
+---
+- name: restart oddjobd
+  service: name=oddjobd state=restarted
+
+- name: restart sshd
+  service: name=sshd state=restarted
+
+- name: restart sssd
+  service: name=sssd state=restarted
+
+- name: reload systemd
+  command: systemctl daemon-reload
+

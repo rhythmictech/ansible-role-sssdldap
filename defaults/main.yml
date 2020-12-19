@@ -1,0 +1,76 @@
+---
+# Setting for authconfig faillockargs parameter, which configures pam_faillock. The defaults here are CIS compliant
+## For options see `man pam_faillock`
+sssdldap_faillock_count: "deny=5 unlock_time=900"
+
+# Minimum password length for pwquality, typically only for local accounts. The defaults here are CIS compliant
+sssdldap_password_minlen: "14"
+
+# Number of passwords to remember for pwhistory. The defaults here are CIS compliant
+sssdldap_password_history: "5"
+
+# SSSD Domain Configuration
+
+## LDAP URI's for SSSD to use. Seperate multiple URIs with a space.
+##sssdldap_ldap_uri: "ldap://ldap.example.com ldaps://ldapssl.example.com"
+
+## DN of user to bind as.
+##sssdldap_bind_dn: "cn=binduser,ou=users,dc=example,dc=com"
+
+## Password of bind_dn user
+##sssdldap_bind_pw: "solarwinds123"
+
+## Base of LDAP tree to search from. Typically your rootDSE
+##sssdldap_search_base: "dc=example,dc=com"
+
+## Base of LDAP tree to search for sudoers policies
+sssdldap_sudo_search_base: "ou=sudoers,{{ sssdldap_search_base }}" 
+
+## LDAP filter to apply for access.
+sssdldap_access_filter: "(&(objectclass=shadowaccount)(objectclass=posixaccount))"
+
+## Enable TLS for LDAP. Will require a valid cert on the ldap uri
+sssdldap_enable_tls: true
+
+## Certificate trust file for LDAP. This should point to your system-wide root CA store
+sssdldap_cacert: /etc/pki/tls/certs/ca-bundle.crt
+
+## Is our LDAP server Active Directory?
+sssdldap_ldap_is_ad: false
+
+## List of users to not pass through SSSD
+sssdldap_filter_users:
+  - root
+  - ldap
+  - named
+  - avahi
+  - haldaemon
+  - dbus
+  - radiusd
+  - news
+  - postfix
+  - apache
+  - nagios
+  - vagrant
+  - ansible
+
+## List of groups to not pass through SSSD
+sssdldap_filter_groups:
+  - root
+  - nagios
+  - vagrant
+  - ansible
+
+# SSH Configuration
+
+## List of users to deny ssh access to
+sssdldap_ssh_denyusers: root,bin,daemon,adm,lp,mail,uucp,operator,games,gopher,ftp,nobody,dbus,rpc,usbmuxd,avahi-autiipd,hsqldb,abrt,pegasus,cimsrvr,oprofile,vcsa,rtkit,apache,saslauth,rpcuser,nfsnobody,qpidd,postfix,haldaemon,ricci,ntp,qemu,memcached,radvd,avahi,pulse,gdm,tomcat,webalizer,piranha,sshd,luci,dovecot,dovenull,tcpdump
+
+## Path to ssh banner, or none
+sssdldap_ssh_banner: /etc/issue
+
+## Allow X11 Forwarding
+sssdldap_ssh_x11_forwarding: no
+
+## Max SSH auth tries; may need to increase this if using a large number of ssh keys
+sssdldap_ssh_maxauthtries: 4

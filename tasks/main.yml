@@ -1,0 +1,95 @@
+---  
+- name: ensure sssd packages are installed
+  yum:
+    name:
+      - sssd
+      - oddjob-mkhomedir
+    state: installed
+  tags: ['sssdldap']
+
+- name: configure pam to use sssd
+  shell:
+    cmd: /sbin/authconfig --update --enablefaillock --faillockargs="{{ sssdldap_faillock_args }}" --passalgo=sha512 --enablesssd --enablesssdauth --enablemkhomedir --passminlen={{ sssdldap_password_minlen }} --enablereqlower --enablerequpper --enablereqdigit --enablereqother --enableshadow
+    warn: no
+  changed_when: False
+  tags: ['sssdldap']
+
+# https://access.redhat.com/solutions/2794091
+- name: ensure password history file exists for CIS 5.3.3
+  file:
+    path: /etc/security/opasswd
+    owner: root
+    group: root
+    mode: 0600
+    state: touch
+    modification_time: preserve
+    access_time: preserve
+  tags: ['sssdldap']
+
+# https://access.redhat.com/solutions/2794091
+- name: configure password history for CIS 5.3.3
+  lineinfile:
+    path: /etc/pam.d/system-auth-ac
+    line: 'password    required      pam_pwhistory.so remember={{ sssdldap_password_history }} use_authtok'
+    insertafter: '^password\s+requisite\s+pam_pwquality.so\s.*'
+  tags: ['sssdldap']
+
+- name: restrict su access to wheel group for CIS 5.6
+  lineinfile:
+    path: /etc/pam.d/su
+    regexp: '^auth\s+required\s+pam_wheel.so'
+    line: 'auth            required        pam_wheel.so use_uid'
+    insertafter: '^auth\s+sufficient\s+pam_rootok.so'
+  tags: ['sssdldap']
+
+- name: ensure sssd.conf is setup
+  template:
+    src: etc.sssd.sssd.conf.j2
+    dest: /etc/sssd/sssd.conf
+    owner: root
+    group: root
+    mode: 0600
+  register: sssd_conf
+  tags: ['sssdldap']
+
+- name: ensure sssd services are started and enabled
+  service: name="{{ item }}" state=started enabled=yes
+  with_items:
+    - sssd
+    - oddjobd
+  tags: ['sssdldap']
+
+- name: restart sssd
+  service: name=sssd state=restarted
+  when: sssd_conf is changed
+  tags: ['sssdldap']
+
+- name: ensure sshd_config is setup
+  template:
+    src: etc.ssh.sshd_config.j2
+    dest: /etc/ssh/sshd_config
+    owner: root
+    group: root
+    mode: 0600
+  notify: restart sshd
+  tags: ['sssdldap']
+
+- name: configure sudo to use sssd
+  lineinfile:
+    path: /etc/nsswitch.conf
+    regexp: '^sudoers:.*$'
+    line: "sudoers:    files sss"
+  tags: ['sssdldap']
+
+- name: ensure the sudoers dir is configured
+  file: path=/etc/sudoers.d state=directory owner=root group=root mode=0750
+  tags: ['sssdldap']
+
+- name: ensure sudoers base config is in place
+  template:
+    src: etc.sudoers.j2
+    dest: /etc/sudoers
+    owner: root
+    group: root
+    mode: 0440
+  tags: ['sssdldap']

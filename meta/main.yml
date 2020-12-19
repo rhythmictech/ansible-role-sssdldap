@@ -1,0 +1,17 @@
+---
+
+galaxy_info:
+  author: Rhythmic Operations <opsteam@rhythmictech.com>
+  description: Ansible Role for sssd-based LDAP authentication
+  company: Rhythmic Technologies, Inc.
+  license: Proprietary
+  min_ansible_version: 2.0
+  platforms:
+    - name: EL
+      versions:
+        - 6
+        - 7
+    - name: Amazon Linux 2
+      versions:
+        - all
+dependencies: []
