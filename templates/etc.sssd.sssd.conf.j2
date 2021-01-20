@@ -29,7 +29,7 @@ ldap_id_use_start_tls = true
 {% else %}
 ldap_tls_reqcert = never
 ldap_id_use_start_tls = false
-{% end %}
+{% endif %}
 
 ldap_default_bind_dn = {{ sssdldap_bind_dn }}
 ldap_default_authtok_type = password
