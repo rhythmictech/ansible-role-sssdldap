@@ -70,7 +70,7 @@ sssdldap_ssh_denyusers: root,bin,daemon,adm,lp,mail,uucp,operator,games,gopher,f
 sssdldap_ssh_banner: /etc/issue
 
 ## Allow X11 Forwarding
-sssdldap_ssh_x11_forwarding: no
+sssdldap_ssh_x11_forwarding: "no"
 
 ## Max SSH auth tries; may need to increase this if using a large number of ssh keys
 sssdldap_ssh_maxauthtries: 4
