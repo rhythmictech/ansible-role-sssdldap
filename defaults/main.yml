@@ -1,7 +1,7 @@
 ---
 # Setting for authconfig faillockargs parameter, which configures pam_faillock. The defaults here are CIS compliant
 ## For options see `man pam_faillock`
-sssdldap_faillock_count: "deny=5 unlock_time=900"
+sssdldap_faillock_args: "deny=5 unlock_time=900"
 
 # Minimum password length for pwquality, typically only for local accounts. The defaults here are CIS compliant
 sssdldap_password_minlen: "14"
